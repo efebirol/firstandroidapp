@@ -1,18 +1,67 @@
 ## Start - Corrected Tutorial Code
-
 version: 2
-jobs:
-  build:
+
+# Reference small tasks or commands to re-use them in multiple jobs
+references:
+  # Configure the base image to run the jobs in
+  setup_container_tests: &setup_container_tests
     docker: # use the docker executor type; machine and macos executors are also supported
 #      - image: circleci/openjdk:8-jdk-browsers
       - image: circleci/node:4.8.2
+    working_directory: ~/repo
 
+  setup_container: &setup_container
+    docker:
+      - image: circleci/node:10.10.0
+    working_directory: ~/repo
+
+jobs:
+
+  # This job runs setup tasks
+  # e.g. npm install, composer install, gradle build (?)
+  setup:
+    <<: *setup_container
     steps:
-      - checkout # check out the code in the project directory
-      - run: echo "hello world" # run the `echo` command
-      - run: # run tests
-          name: test
-          command: npm test
+      - checkout # circle ci specific command to check out the current commit
+      - run:
+          name: Install dependencies
+          command: npm install # runs a shell command
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - ./*
+
+
+  # This job runs our (unit) tests
+  test:
+    <<: *setup_container_tests
+    steps:
+      - attach_workspace:
+          at: ~/repo/myworkspace
+      - run: npm run test
+
+  # This job builds our application
+  build:
+    <<: *setup_container
+    steps:
+      - attach_workspace:
+          at: ~/repo/myworkspace
+      - run: npm run build
+
+  # This job deploys our application
+  deploy:
+    <<: *setup_container
+    steps:
+      - attach_workspace:
+          at: ~/repo/myworkspace
+      - run: ./deploy.sh
+
+#    steps:
+#      - checkout # check out the code in the project directory
+#      - run: echo "Tile Pfad" # run the `echo` command
+#      - run: # run tests
+#          name: test
+#          command: npm test
 
 #  dependencies:
 #    pre:
@@ -27,6 +76,7 @@ jobs:
 #      - cp -r app/build/outputs $CIRCLE_ARTIFACTS
 
 ## End - Corrected Tutorial Code
+
 
 # Java Gradle CircleCI 2.0 configuration file
 #

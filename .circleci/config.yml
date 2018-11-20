@@ -1,3 +1,33 @@
+## Start - Corrected Tutorial Code
+
+version: 2
+jobs:
+  build:
+    docker: # use the docker executor type; machine and macos executors are also supported
+#      - image: circleci/openjdk:8-jdk-browsers
+      - image: circleci/node:4.8.2
+
+    steps:
+      - checkout # check out the code in the project directory
+#      - run: echo "hello world" # run the `echo` command
+#      - run: # run tests
+#          name: test
+#          command: npm test
+
+#  dependencies:
+#    pre:
+#      - echo y | android update sdk --no-ui --all --filter tools,extra-android-m2repository,extra-android-support,android-25
+#      - echo y | android update sdk --no-ui --all --filter build-tools-25.0.2
+
+#  test:
+#    docker:
+#      - image: circleci/openjdk:8-jdk-browsers
+#    override:
+#      - ./gradlew assembleDebug
+#      - cp -r app/build/outputs $CIRCLE_ARTIFACTS
+
+## End - Corrected Tutorial Code
+
 # Java Gradle CircleCI 2.0 configuration file
 #
 # Check https://circleci.com/docs/2.0/language-java/ for more details
@@ -42,16 +72,25 @@
 #      # run tests!
 #      - run: ./gradlew test
 
-machine:
-  java:
-    version: oraclejdk8
+### Tutorial
 
-dependencies:
-  pre:
-    - echo y | android update sdk --no-ui --all --filter tools,extra-android-m2repository,extra-android-support,android-25
-    - echo y | android update sdk --no-ui --all --filter build-tools-25.0.2
+#version: 2
+#jobs:
+#  build:
+#    machine:    # alternativ "docker"
+#      - image: circleci/openjdk:8-jdk-browsers
+#
+#  dependencies:
+#    pre:
+#      - echo y | android update sdk --no-ui --all --filter tools,extra-android-m2repository,extra-android-support,android-25
+#      - echo y | android update sdk --no-ui --all --filter build-tools-25.0.2
+#
+#  test:
+#    override:
+#      - ./gradlew assembleDebug
+#      - cp -r app/build/outputs $CIRCLE_ARTIFACTS
 
-test:
-  override:
-    - ./gradlew assembleDebug
-    - cp -r app/build/outputs $CIRCLE_ARTIFACTS
+#### End Tutorial
+
+
+

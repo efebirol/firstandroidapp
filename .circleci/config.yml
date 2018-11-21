@@ -1,146 +1,22 @@
-## Start - Corrected Tutorial Code
-version: 2
-
-# Reference small tasks or commands to re-use them in multiple jobs
-references:
-  # Configure the base image to run the jobs in
-  setup_container_tests: &setup_container_tests
-    docker: # use the docker executor type; machine and macos executors are also supported
-#      - image: circleci/openjdk:8-jdk-browsers
-      - image: circleci/node:4.8.2
-    working_directory: ~/repo
-
-  setup_container: &setup_container
-    docker:
-      - image: circleci/node:10.10.0
-    working_directory: ~/repo
-
-jobs:
-
-  # This job runs setup tasks
-  # e.g. npm install, composer install, gradle build (?)
-  setup:
-    <<: *setup_container
-    steps:
-      - checkout # circle ci specific command to check out the current commit
-      - run:
-          name: Install dependencies
-          command: npm install # runs a shell command
-      - persist_to_workspace:
-          root: ~/repo
-          paths:
-            - ./*
-
-
-  # This job runs our (unit) tests
-  test:
-    <<: *setup_container_tests
-    steps:
-      - attach_workspace:
-          at: ~/repo/myworkspace
-      - run: npm run test
-
-  # This job builds our application
+version: 2    #We always start with the version.
+jobs:         #each jobs is a Build-Test-Deploy process (e. g. for building with "build")
   build:
-    <<: *setup_container
+    working_directory: ~/code   # where  the code will be git checkout (Info: only used for this job)
+    docker:
+      - image: circleci/android:api-25-alpha
+    environment:
+      JVM_OPTS: -Xmx3200m
     steps:
-      - attach_workspace:
-          at: ~/repo/myworkspace
-      - run: npm run build
-
-  # This job deploys our application
-  deploy:
-    <<: *setup_container
-    steps:
-      - attach_workspace:
-          at: ~/repo/myworkspace
-      - run: ./deploy.sh
-
-#    steps:
-#      - checkout # check out the code in the project directory
-#      - run: echo "Tile Pfad" # run the `echo` command
-#      - run: # run tests
-#          name: test
-#          command: npm test
-
-#  dependencies:
-#    pre:
-#      - echo y | android update sdk --no-ui --all --filter tools,extra-android-m2repository,extra-android-support,android-25
-#      - echo y | android update sdk --no-ui --all --filter build-tools-25.0.2
-
-#  test:
-#    docker:
-#      - image: circleci/openjdk:8-jdk-browsers
-#    override:
-#      - ./gradlew assembleDebug
-#      - cp -r app/build/outputs $CIRCLE_ARTIFACTS
-
-## End - Corrected Tutorial Code
-
-
-# Java Gradle CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-java/ for more details
-#
-
-#version: 2
-#jobs:
-#  build:
-#    docker:
-#      # specify the version you desire here
-#      - image: circleci/openjdk:8-jdk
-#
-#      # Specify service dependencies here if necessary
-#      # CircleCI maintains a library of pre-built images
-#      # documented at https://circleci.com/docs/2.0/circleci-images/
-#      # - image: circleci/postgres:9.4
-#
-#    working_directory: ~/repo
-#
-#    environment:
-#      # Customize the JVM maximum heap limit
-#      JVM_OPTS: -Xmx3200m
-#      TERM: dumb
-#
-#    steps:
-#      - checkout
-#
-#      # Download and cache dependencies
-#      - restore_cache:
-#          keys:
-#          - v1-dependencies-{{ checksum "build.gradle" }}
-#          # fallback to using the latest cache if no exact match is found
-#          - v1-dependencies-
-#
-#      - run: ./gradlew dependencies
-#
-#      - save_cache:
-#          paths:
-#            - ~/.gradle
-#          key: v1-dependencies-{{ checksum "build.gradle" }}
-#
-#      # run tests!
-#      - run: ./gradlew test
-
-### Tutorial
-
-#version: 2
-#jobs:
-#  build:
-#    machine:    # alternativ "docker"
-#      - image: circleci/openjdk:8-jdk-browsers
-#
-#  dependencies:
-#    pre:
-#      - echo y | android update sdk --no-ui --all --filter tools,extra-android-m2repository,extra-android-support,android-25
-#      - echo y | android update sdk --no-ui --all --filter build-tools-25.0.2
-#
-#  test:
-#    override:
-#      - ./gradlew assembleDebug
-#      - cp -r app/build/outputs $CIRCLE_ARTIFACTS
-
-#### End Tutorial
-
-
-
+      - checkout
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}
+      # - run:
+      #     name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
+      #     command: sudo chmod +x ./gradlew
+      - run:
+          name: Download Dependencies
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: jars-{{ checksum "build.gradle" }}-{{ checksum  "app/build.gradle" }}

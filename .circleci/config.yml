@@ -19,7 +19,7 @@ jobs:         #each jobs is a Build-Test-Deploy process (e. g. for building with
       #     command: sudo chmod +x ./gradlew
 
       - run: |
-          name: Echo Example with Multiple Commands
+          echo Example with Multiple Commands
           echo Gebe mehrere Zeile in Circleci Commandline aus
           echo Hier mal 'pwd'
           pwd
